@@ -1,6 +1,7 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
@@ -21,14 +22,20 @@ namespace Sudoku.ViewModel
             }
         }
         public ObservableCollection<Model.Point> Points { get; set; }
+        
         public Model.Point Point(int y, int x)
         {
+        	
             return Points.ElementAt(y * 9 + x);
         }
 
         private void OnPropertyChanged(string property)
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(property));
+        	if(PropertyChanged!=null)
+        	{
+				PropertyChanged(this, new PropertyChangedEventArgs(property));
+        	}
+            //PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(property));
         }
         public Field()
         {
@@ -36,6 +43,7 @@ namespace Sudoku.ViewModel
             for (int i = 0; i < 81; i++)
                 Points.Add(new Model.Point { Value = 0, IsActive = true });
             BaseFill();
+			Transposing();
         }
         private void BaseFill()
         {
@@ -51,6 +59,28 @@ namespace Sudoku.ViewModel
                 }
             }
         }
+        private void Swap(Model.Point p1, Model.Point p2)
+        {
+			Model.Point tmp = new Model.Point {
+				Value = p1.Value,
+				IsActive = p1.IsActive
+			};
+			p1.Value = p2.Value;
+			p1.IsActive = p2.IsActive;
+			p2.Value = tmp.Value;
+			p2.IsActive = tmp.IsActive;
+        }
+        private void Transposing()
+        {
+        	for(int x=0;x<9;x++)
+        	{
+        		for(int y=x;y<9;y++)
+        		{
+					Swap(Point(x, y), Point(y, x));
+        		}
+        	}
+        }
+        
         public event PropertyChangedEventHandler PropertyChanged;
     }
 }
